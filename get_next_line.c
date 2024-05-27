@@ -1,39 +1,126 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.h                                    :+:      :+:    :+:   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: astefane <astefane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/14 13:02:00 by astefane          #+#    #+#             */
-/*   Updated: 2024/05/27 16:47:50 by astefane         ###   ########.fr       */
+/*   Created: 2024/05/10 11:25:54 by astefane          #+#    #+#             */
+/*   Updated: 2024/05/27 16:35:15 by astefane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#include "get_next_line.h"
 
-# ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 1000
-# endif
+char	*ft_free(char **str)
+{
+	free(*str);
+	str = NULL;
+	return (NULL);
+}
 
-# include <stdarg.h>
-# include <string.h>
-# include <fcntl.h>
-# include <stdlib.h>
-# include <unistd.h>
-# include <stdio.h>
-# include <stdint.h>
+char	*ft_cleanline(char *str)
+{
+	char			*newstring;
+	char			*character;
+	unsigned int	len;
 
-char	*get_next_line(int fd);
-char	*ft_strchr(char *s, int c);
-size_t	ft_strlen(const char *s);
-char	*ft_strjoin(const char *s1, const char *s2);
-void	*ft_memcpy(void *dst, const void *src, size_t n);
-char	*ft_substr(char const *s, unsigned int start, size_t len);
-char	*ft_reading(int fd, char *str);
-char	*ft_get_line(char *str);
-char	*ft_cleanline(char *str);
-char	*ft_free(char **str);
+	character = ft_strchr(str, '\n');
+	if (!character)
+		return (ft_free(&str));
+	else
+		len = (unsigned int)(character - str) + 1;
+	if (!str[len])
+		return (ft_free(&str));
+	newstring = ft_substr(str, len, ft_strlen(str) - len);
+	if (!newstring)
+		return (NULL);
+	ft_free(&str);
+	return (newstring);
+}
 
-#endif
+char	*ft_get_line(char *str)
+{
+	char			*line;
+	char			*character;
+	size_t			len;
+
+	character = ft_strchr(str, '\n');
+	len = (size_t)(character - str) + 1;
+	line = ft_substr(str, 0, len);
+	if (!line)
+		return (NULL);
+	return (line);
+}
+
+char	*ft_reading(int fd, char *str)
+{
+	char		*buffer;
+	ssize_t		bytes_read;
+
+	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
+		return (ft_free(&str));
+	bytes_read = 1;
+	while (!ft_strchr(buffer, '\n') && bytes_read > 0)
+	{
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read > 0)
+		{
+			buffer[bytes_read] = '\0';
+			str = ft_strjoin(str, buffer);
+		}
+	}
+	str[bytes_read] = '\0';
+	ft_free(&buffer);
+	if (bytes_read == -1)
+		return (ft_free(&str));
+	return (str);
+}
+
+char	*get_next_line(int fd)
+{
+	static char	*str;
+	char		*line;
+
+	if (str == NULL)
+		str = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+	if ((str && !ft_strchr(str, '\n')) || !str)
+		str = ft_reading(fd, str);
+	if (!str)
+		return (NULL);
+	line = ft_get_line(str);
+	if (!line)
+		return (ft_free(&str));
+	str = ft_cleanline(str);
+	return (line);
+}
+// Función principal
+
+/* int	main(int argc, char *argv[])
+{
+	char	*line;
+	int		fd;
+
+	if (argc != 2)
+	{
+		fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+		return (1);
+	}
+	fd = open(argv[1], O_RDONLY);
+	if (fd == -1)
+	{
+		perror("Error opening file");
+		return (1);
+	}
+	while ((line = get_next_line(fd)) != NULL)
+	{
+		printf("%s", line);
+		free(line);
+	}
+	close(fd);
+	return (0);
+}
+ */
