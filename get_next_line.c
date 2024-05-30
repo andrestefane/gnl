@@ -15,7 +15,7 @@
 char	*ft_free(char **str)
 {
 	free(*str);
-	str = NULL;
+	*str = NULL;
 	return (NULL);
 }
 
@@ -27,7 +27,10 @@ char	*ft_cleanline(char *str)
 
 	character = ft_strchr(str, '\n');
 	if (!character)
+	{
+		newstring = NULL;
 		return (ft_free(&str));
+	}
 	else
 		len = (unsigned int)(character - str) + 1;
 	if (!str[len])
@@ -62,6 +65,7 @@ char	*ft_reading(int fd, char *str)
 	if (!buffer)
 		return (ft_free(&str));
 	bytes_read = 1;
+	buffer[0] = '\0';
 	while (!ft_strchr(buffer, '\n') && bytes_read > 0)
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
@@ -71,8 +75,7 @@ char	*ft_reading(int fd, char *str)
 			str = ft_strjoin(str, buffer);
 		}
 	}
-	str[bytes_read] = '\0';
-	ft_free(&buffer);
+	ft_free(buffer);
 	if (bytes_read == -1)
 		return (ft_free(&str));
 	return (str);
@@ -83,8 +86,6 @@ char	*get_next_line(int fd)
 	static char	*str;
 	char		*line;
 
-	if (str == NULL)
-		str = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	if ((str && !ft_strchr(str, '\n')) || !str)
@@ -99,7 +100,7 @@ char	*get_next_line(int fd)
 }
 // Función principal
 
-/* int	main(int argc, char *argv[])
+int	main(int argc, char *argv[])
 {
 	char	*line;
 	int		fd;
@@ -123,4 +124,3 @@ char	*get_next_line(int fd)
 	close(fd);
 	return (0);
 }
- */
