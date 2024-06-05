@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: astefane <astefane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/10 11:25:54 by astefane          #+#    #+#             */
-/*   Updated: 2024/05/30 15:35:42 by astefane         ###   ########.fr       */
+/*   Created: 2024/06/05 13:59:27 by astefane          #+#    #+#             */
+/*   Updated: 2024/06/05 15:11:18 by astefane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 char	*ft_free(char **str)
 {
@@ -87,24 +87,24 @@ char	*ft_reading(int fd, char *str)
 
 char	*get_next_line(int fd)
 {
-	static char	*str;
+	static char	*str[1024];
 	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	if ((str && !ft_strchr(str, '\n')) || !str)
-		str = ft_reading(fd, str);
-	if (!str)
+	if ((str[fd] && !ft_strchr(str[fd], '\n')) || !str[fd])
+		str[fd] = ft_reading(fd, str[fd]);
+	if (!str[fd])
 		return (NULL);
-	line = ft_get_line(str);
+	line = ft_get_line(str[fd]);
 	if (!line)
-		return (ft_free(&str));
-	str = ft_cleanline(str);
+		return (ft_free(&str[fd]));
+	str[fd] = ft_cleanline(str[fd]);
 	return (line);
 }
 // Función principal
 
-/* int	main(int argc, char *argv[])
+int	main(int argc, char *argv[])
 {
 	char	*line;
 	int		fd;
@@ -127,4 +127,4 @@ char	*get_next_line(int fd)
 	}
 	close(fd);
 	return (0);
-} */
+}
