@@ -6,7 +6,7 @@
 /*   By: astefane <astefane@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/05 13:59:27 by astefane          #+#    #+#             */
-/*   Updated: 2024/06/05 15:11:18 by astefane         ###   ########.fr       */
+/*   Updated: 2024/06/10 13:13:13 by astefane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,27 +104,35 @@ char	*get_next_line(int fd)
 }
 // Función principal
 
-int	main(int argc, char *argv[])
+int	main(int argc, char **argv)
 {
 	char	*line;
 	int		fd;
+	int		i;
 
-	if (argc != 2)
+	i = 1;
+	if (argc < 2)
 	{
-		fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+		printf("%s", argv[0]);
 		return (1);
 	}
-	fd = open(argv[1], O_RDONLY);
-	if (fd == -1)
+	while (argv[i] != NULL)
 	{
-		perror("Error opening file");
-		return (1);
+		fd = open(argv[i], O_RDONLY);
+		if (fd == -1)
+		{
+			perror("Error opening file");
+			i++;
+			continue;
+		}
+		printf("\n%s\n", argv[i]);
+		while ((line = get_next_line(fd)) != NULL)
+		{
+			printf("%s", line);
+			free(line);
+		}
+		close(fd);
+		i++;
 	}
-	while ((line = get_next_line(fd)) != NULL)
-	{
-		printf("%s", line);
-		free(line);
-	}
-	close(fd);
 	return (0);
 }
